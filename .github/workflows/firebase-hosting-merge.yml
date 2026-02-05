@@ -18,4 +18,4 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECHOES_OF_THE_PAST_F27CA }}'
           channelId: live
-          projectId: echoes-of-the-past
+          projectId: echoes-of-the-past-f27ca
