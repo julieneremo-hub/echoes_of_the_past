@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'auth_popup.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'faq_popup.dart';
+import 'contact_popup.dart';
+import 'terms_of_service_popup.dart';
+import 'privacy_popup.dart';
+import 'sys_req_popup.dart';
 
 // --- DATA MODEL ---
 class HistoricalLocation {
@@ -109,112 +114,27 @@ class _MapPageState extends State<MapPage> {
     selectedLocation = locations[0]; 
   }
 
+  // Helper method to open the game URL in a new browser tab
+  Future<void> _launchGameUrl() async {
+    final Uri gameUrl = Uri.parse('https://your-game-url.com'); // Replace with your actual game URL
+    if (!await launchUrl(gameUrl, webOnlyWindowName: '_blank')) {
+      debugPrint('Could not launch $gameUrl');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final bool isMobile = screenWidth < 950; // Aligned width threshold with home.dart
+    final bool isMobile = screenWidth < 950;
     final bool isCompact = screenWidth < 1024;
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFF0F172A),
-      // Dynamic end drawer architecture copied directly from home.dart reference
-      endDrawer: isMobile
-          ? Drawer(
-              backgroundColor: const Color(0xFF0F172A),
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                children: [
-                  _drawerNavLink("Home", "/"),
-                  _drawerNavLink("About", "/about"),
-                  _drawerNavLink("Map", "/map", isActive: true), // Active indicator here
-                  _drawerNavLink("Character Info", "/char_info"),
-                  _drawerNavLink("Login", "/auth_popup"),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.download_rounded, size: 18, color: Colors.white),
-                    label: const Text("Download Game", style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC2410C),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : null,
+      endDrawer: isMobile ? _buildDrawer(context) : null,
       body: CustomScrollView(
         slivers: [
-          // EXACT STRUCTURAL APP BAR FROM HOME.DART
-          SliverAppBar(
-            backgroundColor: Colors.black.withOpacity(0.9),
-            floating: true,
-            pinned: true,
-            toolbarHeight: 80,
-            automaticallyImplyLeading: false,
-            actions: isMobile
-                ? [
-                    IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                      onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-                    ),
-                    const SizedBox(width: 12),
-                  ]
-                : null,
-            title: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    'assets/EOTP_Logo.png',
-                    height: 48,
-                    width: 48,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 48,
-                        width: 48,
-                        color: const Color(0xFFC2410C),
-                        alignment: Alignment.center,
-                        child: const Text("E", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Echoes of the Past", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                    Text("History & Culture of Cavite City", style: TextStyle(fontSize: 10, color: Color(0xFFFB923C))),
-                  ],
-                ),
-                if (!isMobile) ...[
-                  const Spacer(),
-                  _navLink(context, "Home", "/"),
-                  _navLink(context, "About", "/about"),
-                  _navLink(context, "Map", "/map", isActive: true), // Highlight active map link
-                  _navLink(context, "Character Info", "/char_info"),
-                  _navLink(context, "Login", "/auth_popup"),
-                  const SizedBox(width: 20),
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.download_rounded, size: 18, color: Colors.white),
-                    label: const Text("Download Game", style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC2410C),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          
+          _buildAppBar(context, isMobile),
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -236,7 +156,7 @@ class _MapPageState extends State<MapPage> {
                         child: Container(
                           height: isCompact ? 400 : 550,
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha:0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.white10),
                           ),
@@ -316,7 +236,135 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
+  // --- APP BAR & NAVIGATION COMPONENTS ---
+
+  SliverAppBar _buildAppBar(BuildContext context, bool isMobile) {
+    return SliverAppBar(
+      backgroundColor: Colors.black.withValues(alpha:0.9),
+      floating: true,
+      pinned: true,
+      toolbarHeight: 80,
+      automaticallyImplyLeading: false,
+      actions: isMobile
+          ? [
+              IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+              ),
+              const SizedBox(width: 12),
+            ]
+          : null,
+      title: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/EOTP_Logo.png',
+              height: 48,
+              width: 48,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 48,
+                  width: 48,
+                  color: const Color(0xFFC2410C),
+                  alignment: Alignment.center,
+                  child: const Text("E", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Echoes of the Past", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text("History & Culture of Cavite City", style: TextStyle(fontSize: 10, color: Color(0xFFFB923C))),
+            ],
+          ),
+          if (!isMobile) ...[
+            const Spacer(),
+            _navLink(context, "Home", "/"),
+            _navLink(context, "About", "/about"),
+            _navLink(context, "Map", "/map", isActive: true),
+            _navLink(context, "Character Info", "/char_info"),
+            const SizedBox(width: 20),
+            _buildPlayGameButton(isMobile: false),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      backgroundColor: const Color(0xFF0F172A),
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        children: [
+          _drawerNavLink("Home", "/"),
+          _drawerNavLink("About", "/about"),
+          _drawerNavLink("Map", "/map", isActive: true),
+          _drawerNavLink("Character Info", "/char_info"),
+          const SizedBox(height: 24),
+          _buildPlayGameButton(isMobile: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayGameButton({required bool isMobile}) {
+    return ElevatedButton.icon(
+      onPressed: _launchGameUrl,
+      icon: const Icon(Icons.play_arrow_rounded, size: 18, color: Colors.white),
+      label: const Text("Play Game", style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFC2410C),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 16 : 20, 
+          vertical: isMobile ? 16 : 15,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  Widget _navLink(BuildContext context, String text, String route, {bool isActive = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: InkWell(
+        onTap: () => Navigator.of(context).pushNamed(route),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isActive ? const Color(0xFFF97316) : Colors.white70,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _drawerNavLink(String text, String route, {bool isActive = false}) {
+    return ListTile(
+      title: Text(
+        text,
+        style: TextStyle(
+          color: isActive ? const Color(0xFFF97316) : Colors.white70,
+          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.of(context).pushNamed(route);
+      },
+    );
+  }
+
   // --- MAP CORE INTERACTION WIDGETS ---
+
   Widget _interactivePin(HistoricalLocation loc) {
     bool isSelected = selectedLocation.name == loc.name;
     return GestureDetector(
@@ -324,9 +372,9 @@ class _MapPageState extends State<MapPage> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.orange : Colors.orange.withOpacity(0.4),
+          color: isSelected ? Colors.orange : Colors.orange.withValues(alpha:0.4),
           shape: BoxShape.circle,
-          boxShadow: isSelected ? [BoxShadow(color: Colors.orange.withOpacity(0.5), blurRadius: 20, spreadRadius: 5)] : [],
+          boxShadow: isSelected ? [BoxShadow(color: Colors.orange.withValues(alpha:0.5), blurRadius: 20, spreadRadius: 5)] : [],
         ),
         child: Icon(loc.icon, color: Colors.white, size: isSelected ? 28 : 20),
       ),
@@ -384,7 +432,7 @@ class _MapPageState extends State<MapPage> {
   Widget _infoTile(String text) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha:0.05), borderRadius: BorderRadius.circular(8)),
       child: Row(
         children: [
           const Icon(Icons.circle, color: Colors.orange, size: 8),
@@ -433,7 +481,7 @@ class _MapPageState extends State<MapPage> {
   Widget _mapClick() {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), border: Border.all(color: Colors.orange, width: 0.5)),
+      decoration: BoxDecoration(color: Colors.black.withValues(alpha:0.6), border: Border.all(color: Colors.orange, width: 0.5)),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -463,53 +511,9 @@ class _MapPageState extends State<MapPage> {
       ),
     );
   }
-
-  // --- EXACT LINKS STRINGS MATCHING HOME.DART ---
-  Widget _navLink(BuildContext context, String text, String route, {bool isActive = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-      child: InkWell(
-        onTap: () {
-          if (route == "/auth_popup") {
-            showDialog(context: context, barrierColor: Colors.black87, builder: (context) => const AuthPopup());
-          } else {
-            Navigator.of(context).pushNamed(route);
-          }
-        },
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isActive ? const Color(0xFFF97316) : Colors.white70,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            fontSize: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _drawerNavLink(String text, String route, {bool isActive = false}) {
-    return ListTile(
-      title: Text(
-        text,
-        style: TextStyle(
-          color: isActive ? const Color(0xFFF97316) : Colors.white70,
-          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-      onTap: () {
-        Navigator.pop(context);
-        if (route == "/auth_popup") {
-          showDialog(context: context, barrierColor: Colors.black87, builder: (context) => const AuthPopup());
-        } else {
-          Navigator.of(context).pushNamed(route);
-        }
-      },
-    );
-  }
 }
 
-// --- FULL RESPONSIVE FOOTER FROM HOME.DART REFERENCE ---
+// --- RESPONSIVE FOOTER SECTION ---
 class FooterSection extends StatelessWidget {
   final bool isMobile;
   const FooterSection({super.key, required this.isMobile});
@@ -527,15 +531,15 @@ class FooterSection extends StatelessWidget {
               children: [
                 Expanded(
                   flex: 2,
-                  child: _footerCol(context, "Echoes of the Past", items: [
-                    "An immersive educational role-playing game about the history and cultural heritage of Cavite City through scripted narrative acts and historical investigation."
-                  ]),
+                  child: _footerCol(context, "Echoes of the Past", items: {
+                    "An immersive educational role-playing game about the history and cultural heritage of Cavite City through scripted narrative acts and historical investigation.": ""
+                  }),
                 ),
                 Expanded(
                   child: _footerCol(
                     context,
                     "Game",
-                    navItems: {
+                    items: {
                       "Home": "/",
                       "About": "/about",
                       "Map": "/map",
@@ -543,22 +547,42 @@ class FooterSection extends StatelessWidget {
                     },
                   ),
                 ),
-                Expanded(child: _footerCol(context, "Support", items: ["FAQ", "System Requirements"])),
-                Expanded(child: _footerCol(context, "Legal", items: ["Terms of Service", "Privacy Policy", "Cookie Policy", "Licenses"])),
+                Expanded(
+                  child: _footerCol(
+                    context, 
+                    "Support", 
+                    items: {
+                      "FAQ": "popup_faq",
+                      "Contact Us": "popup_contact",
+                      "System Requirements": "popup_sys_req",
+                    }
+                  ),
+                ),
+                Expanded(
+                  child: _footerCol(
+                    context, 
+                    "Legal", 
+                    items: {
+                      "Terms of Service": "popup_terms", 
+                      "Privacy Policy": "popup_privacy",
+                      "Cookie Policy": "/cookie"
+                    }
+                  ),
+                ),
               ],
             )
           else
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _footerCol(context, "Echoes of the Past", items: [
-                  "An immersive educational role-playing game about the history and cultural heritage of Cavite City through scripted narrative acts."
-                ]),
+                _footerCol(context, "Echoes of the Past", items: {
+                  "An immersive educational role-playing game about the history and cultural heritage of Cavite City through scripted narrative acts.": ""
+                }),
                 const SizedBox(height: 32),
                 _footerCol(
                   context,
                   "Game",
-                  navItems: {
+                  items: {
                     "Home": "/",
                     "About": "/about",
                     "Map": "/map",
@@ -566,9 +590,25 @@ class FooterSection extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 32),
-                _footerCol(context, "Support", items: ["FAQ", "System Requirements"]),
+                _footerCol(
+                  context, 
+                  "Support", 
+                  items: {
+                    "FAQ": "popup_faq",
+                    "Contact Us": "popup_contact",
+                    "System Requirements": "popup_sys_req",
+                  }
+                ),
                 const SizedBox(height: 32),
-                _footerCol(context, "Legal", items: ["Terms of Service", "Privacy Policy", "Cookie Policy", "Licenses"]),
+                _footerCol(
+                  context, 
+                  "Legal", 
+                  items: {
+                    "Terms of Service": "popup_terms", 
+                    "Privacy Policy": "popup_privacy",
+                    "Cookie Policy": "/cookie"
+                  }
+                ),
               ],
             ),
           const SizedBox(height: 60),
@@ -591,28 +631,48 @@ class FooterSection extends StatelessWidget {
     );
   }
 
-  Widget _footerCol(BuildContext context, String title, {List<String>? items, Map<String, String>? navItems}) {
+  Widget _footerCol(BuildContext context, String title, {required Map<String, String> items}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 16),
-        if (items != null)
-          ...items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(item, style: const TextStyle(color: Colors.white38, fontSize: 14)),
-              )),
-        if (navItems != null)
-          ...navItems.entries.map((entry) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: InkWell(
-                  onTap: () => Navigator.of(context).pushNamed(entry.value),
-                  child: Text(
-                    entry.key,
-                    style: const TextStyle(color: Colors.white38, fontSize: 14),
-                  ),
-                ),
-              )),
+        ...items.entries.map((entry) {
+          final String label = entry.key;
+          final String pathValue = entry.value;
+
+          if (pathValue.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(label, style: const TextStyle(color: Colors.white38, fontSize: 14, height: 1.5)),
+            );
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: InkWell(
+              onTap: () {
+                if (pathValue == "popup_faq") {
+                  FaqPopup.show(context);
+                } else if (pathValue == "popup_contact") {
+                  ContactPopup.show(context);
+                } else if (pathValue == "popup_terms") {
+                  TermsOfServicePopup.show(context);
+                } else if (pathValue == "popup_privacy") {
+                  PrivacyPolicyPopup.show(context);
+                } else if (pathValue == "popup_sys_req") {
+                  SysReqPopup.show(context);
+                } else {
+                  Navigator.of(context).pushNamed(pathValue);
+                }
+              },
+              child: Text(
+                label,
+                style: const TextStyle(color: Colors.white38, fontSize: 14),
+              ),
+            ),
+          );
+        }),
       ],
     );
   }

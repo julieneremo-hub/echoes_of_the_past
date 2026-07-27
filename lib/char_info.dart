@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
-import 'auth_popup.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'faq_popup.dart';
+import 'contact_popup.dart';
+import 'terms_of_service_popup.dart';
+import 'privacy_popup.dart';
+import 'sys_req_popup.dart';
 
-class CharacterInfoPage extends StatefulWidget {
-  const CharacterInfoPage({super.key});
+class CharacterInfoPage extends StatelessWidget {
+  CharacterInfoPage({super.key});
 
-  @override
-  State<CharacterInfoPage> createState() => _CharacterInfoPageState();
-}
-
-class _CharacterInfoPageState extends State<CharacterInfoPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Helper method to open the game URL in a new browser tab
+  Future<void> _launchGameUrl() async {
+    final Uri gameUrl = Uri.parse('https://your-game-url.com'); // Replace with your actual game URL
+    if (!await launchUrl(gameUrl, webOnlyWindowName: '_blank')) {
+      debugPrint('Could not launch $gameUrl');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Detect viewport constraints dynamically (matched with home.dart layout specs)
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 950;
     final bool isNarrowScreen = screenWidth < 900;
@@ -22,102 +29,10 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.black,
-      // Collapsible drawer menu active during narrow window views
-      endDrawer: isMobile
-          ? Drawer(
-              backgroundColor: const Color(0xFF0F172A),
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-                children: [
-                  _drawerNavLink("Home", "/"),
-                  _drawerNavLink("About", "/about"),
-                  _drawerNavLink("Map", "/map"),
-                  _drawerNavLink("Character Info", "/char_info", isActive: true),
-                  _drawerNavLink("Login", "/auth_popup"),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.download_rounded, size: 18, color: Colors.white),
-                    label: const Text("Download Game", style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC2410C),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : null,
+      endDrawer: isMobile ? _buildDrawer(context) : null,
       body: CustomScrollView(
         slivers: [
-          // HEADER - Matches home.dart exactly
-          SliverAppBar(
-            backgroundColor: Colors.black.withOpacity(0.9),
-            floating: true,
-            pinned: true,
-            toolbarHeight: 80,
-            automaticallyImplyLeading: false,
-            actions: isMobile
-                ? [
-                    IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                      onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-                    ),
-                    const SizedBox(width: 12),
-                  ]
-                : null,
-            title: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    'assets/EOTP_Logo.png',
-                    height: 48,
-                    width: 48,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 48,
-                        width: 48,
-                        color: const Color(0xFFC2410C),
-                        alignment: Alignment.center,
-                        child: const Text("E", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Echoes of the Past", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                    Text("History & Culture of Cavite City", style: TextStyle(fontSize: 10, color: Color(0xFFFB923C))),
-                  ],
-                ),
-                if (!isMobile) ...[
-                  const Spacer(),
-                  _navLink(context, "Home", "/"),
-                  _navLink(context, "About", "/about"),
-                  _navLink(context, "Map", "/map"),
-                  _navLink(context, "Character Info", "/char_info", isActive: true),
-                  _navLink(context, "Login", "/auth_popup"),
-                  const SizedBox(width: 20),
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.download_rounded, size: 18, color: Colors.white),
-                    label: const Text("Download Game", style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFC2410C),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-
+          _buildAppBar(context, isMobile),
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -127,9 +42,10 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
                   child: Text(
                     "Character Info",
                     style: TextStyle(
-                        color: Colors.white,
-                        fontSize: isNarrowScreen ? 44 : 72,
-                        fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontSize: isNarrowScreen ? 44 : 72,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const Padding(
@@ -309,7 +225,100 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
     );
   }
 
-  // --- Helper Widgets ---
+  // --- APP BAR & DRAWER WIDGETS ---
+
+  SliverAppBar _buildAppBar(BuildContext context, bool isMobile) {
+    return SliverAppBar(
+      backgroundColor: Colors.black.withValues(alpha:0.9),
+      floating: true,
+      pinned: true,
+      toolbarHeight: 80,
+      automaticallyImplyLeading: false,
+      actions: isMobile
+          ? [
+              IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+              ),
+              const SizedBox(width: 12),
+            ]
+          : null,
+      title: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/EOTP_Logo.png',
+              height: 48,
+              width: 48,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 48,
+                  width: 48,
+                  color: const Color(0xFFC2410C),
+                  alignment: Alignment.center,
+                  child: const Text("E", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Echoes of the Past", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text("History & Culture of Cavite City", style: TextStyle(fontSize: 10, color: Color(0xFFFB923C))),
+            ],
+          ),
+          if (!isMobile) ...[
+            const Spacer(),
+            _navLink(context, "Home", "/"),
+            _navLink(context, "About", "/about"),
+            _navLink(context, "Map", "/map"),
+            _navLink(context, "Character Info", "/char_info", isActive: true),
+            const SizedBox(width: 20),
+            _buildPlayGameButton(isMobile: false),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      backgroundColor: const Color(0xFF0F172A),
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        children: [
+          _drawerNavLink(context, "Home", "/"),
+          _drawerNavLink(context, "About", "/about"),
+          _drawerNavLink(context, "Map", "/map"),
+          _drawerNavLink(context, "Character Info", "/char_info", isActive: true),
+          const SizedBox(height: 24),
+          _buildPlayGameButton(isMobile: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlayGameButton({required bool isMobile}) {
+    return ElevatedButton.icon(
+      onPressed: _launchGameUrl,
+      icon: const Icon(Icons.play_arrow_rounded, size: 18, color: Colors.white),
+      label: const Text("Play Game", style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFC2410C),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 16 : 20,
+          vertical: isMobile ? 16 : 15,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  // --- HELPER WIDGETS ---
 
   Widget _storyHeader(String title, {Color color = Colors.white}) {
     return Padding(
@@ -385,9 +394,9 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.2),
+                    color: accentColor.withValues(alpha:0.2),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: accentColor.withOpacity(0.5)),
+                    border: Border.all(color: accentColor.withValues(alpha:0.5)),
                   ),
                   child: Row(
                     children: [
@@ -445,7 +454,7 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withOpacity(0.5), width: 2),
+        border: Border.all(color: accentColor.withValues(alpha:0.5), width: 2),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -480,16 +489,7 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: InkWell(
-        onTap: () {
-          if (route == "/auth_popup") {
-            showDialog(
-                context: context,
-                barrierColor: Colors.black87,
-                builder: (context) => const AuthPopup());
-          } else {
-            Navigator.of(context).pushNamed(route);
-          }
-        },
+        onTap: () => Navigator.of(context).pushNamed(route),
         child: Text(
           text,
           style: TextStyle(
@@ -502,7 +502,7 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
     );
   }
 
-  Widget _drawerNavLink(String text, String route, {bool isActive = false}) {
+  Widget _drawerNavLink(BuildContext context, String text, String route, {bool isActive = false}) {
     return ListTile(
       title: Text(
         text,
@@ -512,20 +512,14 @@ class _CharacterInfoPageState extends State<CharacterInfoPage> {
         ),
       ),
       onTap: () {
-        Navigator.pop(context); // Close sliding drawer overlay
-        if (route == "/auth_popup") {
-          showDialog(
-            context: context,
-            barrierColor: Colors.black87,
-            builder: (context) => const AuthPopup(),
-          );
-        } else {
-          Navigator.of(context).pushNamed(route);
-        }
+        Navigator.pop(context);
+        Navigator.of(context).pushNamed(route);
       },
     );
   }
 }
+
+// --- FULL RESPONSIVE FOOTER MATCHING HOME & MAP PAGES ---
 
 class FooterSection extends StatelessWidget {
   final bool isMobile;
@@ -535,33 +529,107 @@ class FooterSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.black,
-      padding: const EdgeInsets.fromLTRB(60, 80, 60, 40),
+      padding: EdgeInsets.fromLTRB(isMobile ? 24 : 60, 80, isMobile ? 24 : 60, 40),
       child: Column(
         children: [
-          Flex(
-            direction: isMobile ? Axis.vertical : Axis.horizontal,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _footerCol(context, "Echoes of the Past", [
-                "An immersive educational role-playing game about the history and cultural heritage of Cavite City through scripted narrative acts and historical investigation."
-              ], isLarge: !isMobile, isFullWidth: isMobile),
-              if (isMobile) const SizedBox(height: 24),
-              _footerCol(context, "Game", ["Home", "About", "Map", "Character Info"], isFullWidth: isMobile),
-              if (isMobile) const SizedBox(height: 24),
-              _footerCol(context, "Support", ["FAQ", "System Requirements"], isFullWidth: isMobile),
-              if (isMobile) const SizedBox(height: 24),
-              _footerCol(context, "Legal", ["Terms of Service", "Privacy Policy", "Cookie Policy", "Licenses"], isFullWidth: isMobile),
-            ],
-          ),
+          if (!isMobile)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _footerCol(context, "Echoes of the Past", items: {
+                    "An immersive educational role-playing game about the history and cultural heritage of Cavite City through scripted narrative acts and historical investigation.": ""
+                  }),
+                ),
+                Expanded(
+                  child: _footerCol(
+                    context,
+                    "Game",
+                    items: {
+                      "Home": "/",
+                      "About": "/about",
+                      "Map": "/map",
+                      "Character Info": "/char_info",
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: _footerCol(
+                    context,
+                    "Support",
+                    items: {
+                      "FAQ": "popup_faq",
+                      "Contact Us": "popup_contact",
+                      "System Requirements": "popup_sys_req",
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: _footerCol(
+                    context,
+                    "Legal",
+                    items: {
+                      "Terms of Service": "popup_terms",
+                      "Privacy Policy": "popup_privacy",
+                      "Cookie Policy": "/cookie",
+                    },
+                  ),
+                ),
+              ],
+            )
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _footerCol(context, "Echoes of the Past", items: {
+                  "An immersive educational role-playing game about the history and cultural heritage of Cavite City through scripted narrative acts.": ""
+                }),
+                const SizedBox(height: 32),
+                _footerCol(
+                  context,
+                  "Game",
+                  items: {
+                    "Home": "/",
+                    "About": "/about",
+                    "Map": "/map",
+                    "Character Info": "/char_info",
+                  },
+                ),
+                const SizedBox(height: 32),
+                _footerCol(
+                  context,
+                  "Support",
+                  items: {
+                    "FAQ": "popup_faq",
+                    "Contact Us": "popup_contact",
+                    "System Requirements": "popup_sys_req",
+                  },
+                ),
+                const SizedBox(height: 32),
+                _footerCol(
+                  context,
+                  "Legal",
+                  items: {
+                    "Terms of Service": "popup_terms",
+                    "Privacy Policy": "popup_privacy",
+                    "Cookie Policy": "/cookie",
+                  },
+                ),
+              ],
+            ),
           const SizedBox(height: 60),
           const Divider(color: Colors.white10),
           const SizedBox(height: 20),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: Text("© 2025 Echoes of the Past. All rights reserved.",
-                    style: TextStyle(color: Colors.white24, fontSize: 12)),
+                child: Text(
+                  "© 2025 Echoes of the Past. All rights reserved.",
+                  style: const TextStyle(color: Colors.white24, fontSize: 12),
+                  textAlign: isMobile ? TextAlign.center : TextAlign.start,
+                ),
               ),
             ],
           )
@@ -570,45 +638,49 @@ class FooterSection extends StatelessWidget {
     );
   }
 
-  Widget _footerCol(BuildContext context, String title, List<String> items, {bool isLarge = false, bool isFullWidth = false}) {
-    final Map<String, String> routeMap = {
-      "Home": "/",
-      "About": "/about",
-      "Map": "/map",
-      "Character Info": "/char_info",
-    };
-
-    final Widget columnContent = Column(
+  Widget _footerCol(BuildContext context, String title, {required Map<String, String> items}) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
         const SizedBox(height: 16),
-        ...items.map((item) {
-          final String? route = routeMap[item];
+        ...items.entries.map((entry) {
+          final String label = entry.key;
+          final String pathValue = entry.value;
+
+          if (pathValue.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Text(label, style: const TextStyle(color: Colors.white38, fontSize: 14, height: 1.5)),
+            );
+          }
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: InkWell(
-              onTap: route != null ? () => Navigator.of(context).pushNamed(route) : null,
-              mouseCursor: route != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+              onTap: () {
+                if (pathValue == "popup_faq") {
+                  FaqPopup.show(context);
+                } else if (pathValue == "popup_contact") {
+                  ContactPopup.show(context);
+                } else if (pathValue == "popup_terms") {
+                  TermsOfServicePopup.show(context);
+                } else if (pathValue == "popup_privacy") {
+                  PrivacyPolicyPopup.show(context);
+                } else if (pathValue == "popup_sys_req") {
+                  SysReqPopup.show(context);
+                } else {
+                  Navigator.of(context).pushNamed(pathValue);
+                }
+              },
               child: Text(
-                item,
-                style: const TextStyle(
-                  color: Colors.white38,
-                  fontSize: 14,
-                ),
+                label,
+                style: const TextStyle(color: Colors.white38, fontSize: 14),
               ),
             ),
           );
         }),
       ],
-    );
-
-    if (isFullWidth) return columnContent;
-
-    return Expanded(
-      flex: isLarge ? 2 : 1,
-      child: columnContent,
     );
   }
 }

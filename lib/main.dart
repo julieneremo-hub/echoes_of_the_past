@@ -1,19 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'firebase_options.dart';
 import 'home.dart';       
 import 'about.dart';
 import 'map.dart';
 import 'char_info.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
   runApp(const EOTPApp());
 }
 
@@ -48,7 +41,7 @@ class EOTPApp extends StatelessWidget {
         '/': (context) => const HomePage(), 
         '/about': (context) => AboutPage(),
         '/map': (context) => const MapPage(), 
-        '/char_info': (context) => const CharacterInfoPage(),
+        '/char_info': (context) => CharacterInfoPage(),
       },
     );
   }
