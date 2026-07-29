@@ -5,11 +5,10 @@ import 'contact_popup.dart';
 import 'terms_of_service_popup.dart';
 import 'privacy_popup.dart';
 import 'sys_req_popup.dart';
+import 'cookie_popup.dart';
 
 class AboutPage extends StatelessWidget {
-  AboutPage({super.key});
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  const AboutPage({super.key});
 
   // Helper method to open the game URL in a new browser tab
   Future<void> _launchGameUrl() async {
@@ -21,16 +20,17 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 950;
 
     return Scaffold(
-      key: _scaffoldKey,
+      key: scaffoldKey,
       backgroundColor: Colors.black,
       endDrawer: isMobile ? _buildDrawer(context) : null,
       body: CustomScrollView(
         slivers: [
-          _buildAppBar(context, isMobile),
+          _buildAppBar(context, isMobile, scaffoldKey),
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -159,7 +159,7 @@ class AboutPage extends StatelessWidget {
 
   // --- APP BAR & DRAWER WIDGETS ---
 
-  SliverAppBar _buildAppBar(BuildContext context, bool isMobile) {
+  SliverAppBar _buildAppBar(BuildContext context, bool isMobile, GlobalKey<ScaffoldState> scaffoldKey) {
     return SliverAppBar(
       backgroundColor: Colors.black.withValues(alpha: 0.9),
       floating: true,
@@ -170,7 +170,7 @@ class AboutPage extends StatelessWidget {
           ? [
               IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                onPressed: () => scaffoldKey.currentState?.openEndDrawer(),
               ),
               const SizedBox(width: 12),
             ]
@@ -373,6 +373,13 @@ class FooterSection extends StatelessWidget {
   final bool isMobile;
   const FooterSection({super.key, required this.isMobile});
 
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $urlString');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -420,7 +427,7 @@ class FooterSection extends StatelessWidget {
                     items: {
                       "Terms of Service": "popup_terms",
                       "Privacy Policy": "popup_privacy",
-                      "Cookie Policy": "/cookie",
+                      "Cookie Policy": "popup_cookie",
                     },
                   ),
                 ),
@@ -461,7 +468,7 @@ class FooterSection extends StatelessWidget {
                   items: {
                     "Terms of Service": "popup_terms",
                     "Privacy Policy": "popup_privacy",
-                    "Cookie Policy": "/cookie",
+                    "Cookie Policy": "popup_cookie",
                   },
                 ),
               ],
@@ -469,15 +476,24 @@ class FooterSection extends StatelessWidget {
           const SizedBox(height: 60),
           const Divider(color: Colors.white10),
           const SizedBox(height: 20),
-          Row(
+          Flex(
+            direction: isMobile ? Axis.vertical : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  "© 2025 Echoes of the Past. All rights reserved.",
-                  style: const TextStyle(color: Colors.white24, fontSize: 12),
-                  textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                ),
+              Text(
+                "© 2025 Echoes of the Past. All rights reserved.",
+                style: const TextStyle(color: Colors.white24, fontSize: 12),
+                textAlign: isMobile ? TextAlign.center : TextAlign.start,
+              ),
+              if (isMobile) const SizedBox(height: 12),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.facebook, color: Colors.white70, size: 20),
+                tooltip: 'Visit Facebook Page',
+                onPressed: () {
+                  _launchURL('https://www.facebook.com/profile.php?id=61592289615390');
+                },
               ),
             ],
           )
@@ -515,6 +531,8 @@ class FooterSection extends StatelessWidget {
                   TermsOfServicePopup.show(context);
                 } else if (pathValue == "popup_privacy") {
                   PrivacyPolicyPopup.show(context);
+                } else if (pathValue == "popup_cookie") {
+                  CookiePolicyPopup.show(context);
                 } else if (pathValue == "popup_sys_req") {
                   SysReqPopup.show(context);
                 } else {

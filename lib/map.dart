@@ -5,6 +5,7 @@ import 'contact_popup.dart';
 import 'terms_of_service_popup.dart';
 import 'privacy_popup.dart';
 import 'sys_req_popup.dart';
+import 'cookie_popup.dart';
 
 // --- DATA MODEL ---
 class HistoricalLocation {
@@ -156,7 +157,7 @@ class _MapPageState extends State<MapPage> {
                         child: Container(
                           height: isCompact ? 400 : 550,
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha:0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(color: Colors.white10),
                           ),
@@ -181,10 +182,10 @@ class _MapPageState extends State<MapPage> {
                                     );
                                   }),
 
-                                  Positioned(bottom: 40, left: 20, child: _mapClick()),
+                                  Positioned(bottom: 20, left: 20, child: _mapClick()),
                                   
                                   Positioned(
-                                    bottom: 40, right: 40,
+                                    bottom: 20, right: 20,
                                     child: _selectionLabel(selectedLocation.name, selectedLocation.era),
                                   ),
                                 ],
@@ -240,7 +241,7 @@ class _MapPageState extends State<MapPage> {
 
   SliverAppBar _buildAppBar(BuildContext context, bool isMobile) {
     return SliverAppBar(
-      backgroundColor: Colors.black.withValues(alpha:0.9),
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
       floating: true,
       pinned: true,
       toolbarHeight: 80,
@@ -303,10 +304,10 @@ class _MapPageState extends State<MapPage> {
       child: ListView(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         children: [
-          _drawerNavLink("Home", "/"),
-          _drawerNavLink("About", "/about"),
-          _drawerNavLink("Map", "/map", isActive: true),
-          _drawerNavLink("Character Info", "/char_info"),
+          _drawerNavLink(context, "Home", "/"),
+          _drawerNavLink(context, "About", "/about"),
+          _drawerNavLink(context, "Map", "/map", isActive: true),
+          _drawerNavLink(context, "Character Info", "/char_info"),
           const SizedBox(height: 24),
           _buildPlayGameButton(isMobile: true),
         ],
@@ -347,7 +348,7 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Widget _drawerNavLink(String text, String route, {bool isActive = false}) {
+  Widget _drawerNavLink(BuildContext context, String text, String route, {bool isActive = false}) {
     return ListTile(
       title: Text(
         text,
@@ -372,9 +373,9 @@ class _MapPageState extends State<MapPage> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.orange : Colors.orange.withValues(alpha:0.4),
+          color: isSelected ? Colors.orange : Colors.orange.withValues(alpha: 0.4),
           shape: BoxShape.circle,
-          boxShadow: isSelected ? [BoxShadow(color: Colors.orange.withValues(alpha:0.5), blurRadius: 20, spreadRadius: 5)] : [],
+          boxShadow: isSelected ? [BoxShadow(color: Colors.orange.withValues(alpha: 0.5), blurRadius: 20, spreadRadius: 5)] : [],
         ),
         child: Icon(loc.icon, color: Colors.white, size: isSelected ? 28 : 20),
       ),
@@ -432,7 +433,7 @@ class _MapPageState extends State<MapPage> {
   Widget _infoTile(String text) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha:0.05), borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(8)),
       child: Row(
         children: [
           const Icon(Icons.circle, color: Colors.orange, size: 8),
@@ -465,6 +466,7 @@ class _MapPageState extends State<MapPage> {
       decoration: BoxDecoration(border: Border.all(color: Colors.orange, width: 2), color: Colors.black),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
@@ -481,7 +483,7 @@ class _MapPageState extends State<MapPage> {
   Widget _mapClick() {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.black.withValues(alpha:0.6), border: Border.all(color: Colors.orange, width: 0.5)),
+      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), border: Border.all(color: Colors.orange, width: 0.5)),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -517,6 +519,13 @@ class _MapPageState extends State<MapPage> {
 class FooterSection extends StatelessWidget {
   final bool isMobile;
   const FooterSection({super.key, required this.isMobile});
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $urlString');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -565,7 +574,7 @@ class FooterSection extends StatelessWidget {
                     items: {
                       "Terms of Service": "popup_terms", 
                       "Privacy Policy": "popup_privacy",
-                      "Cookie Policy": "/cookie"
+                      "Cookie Policy": "popup_cookie"
                     }
                   ),
                 ),
@@ -606,7 +615,7 @@ class FooterSection extends StatelessWidget {
                   items: {
                     "Terms of Service": "popup_terms", 
                     "Privacy Policy": "popup_privacy",
-                    "Cookie Policy": "/cookie"
+                    "Cookie Policy": "popup_cookie"
                   }
                 ),
               ],
@@ -614,15 +623,24 @@ class FooterSection extends StatelessWidget {
           const SizedBox(height: 60),
           const Divider(color: Colors.white10),
           const SizedBox(height: 20),
-          Row(
+          Flex(
+            direction: isMobile ? Axis.vertical : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  "© 2025 Echoes of the Past. All rights reserved.",
-                  style: const TextStyle(color: Colors.white24, fontSize: 12),
-                  textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                ),
+              Text(
+                "© 2025 Echoes of the Past. All rights reserved.",
+                style: const TextStyle(color: Colors.white24, fontSize: 12),
+                textAlign: isMobile ? TextAlign.center : TextAlign.start,
+              ),
+              if (isMobile) const SizedBox(height: 12),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.facebook, color: Colors.white70, size: 20),
+                tooltip: 'Visit Facebook Page',
+                onPressed: () {
+                  _launchURL('https://www.facebook.com/profile.php?id=61592289615390');
+                },
               ),
             ],
           )
@@ -660,6 +678,8 @@ class FooterSection extends StatelessWidget {
                   TermsOfServicePopup.show(context);
                 } else if (pathValue == "popup_privacy") {
                   PrivacyPolicyPopup.show(context);
+                } else if (pathValue == "popup_cookie") {
+                  CookiePolicyPopup.show(context);
                 } else if (pathValue == "popup_sys_req") {
                   SysReqPopup.show(context);
                 } else {

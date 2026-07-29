@@ -85,11 +85,7 @@ class TermsOfServicePopup extends StatelessWidget {
                       _buildSectionBody(
                         'This game is developed exclusively as an educational framework focused on the cultural heritage and history of Cavite City. All historical narratives, multimedia fragments, and structural interactive layouts are protected by copyright laws.',
                       ),
-                      _buildSectionTitle('3. User Accounts'),
-                      _buildSectionBody(
-                        'When registering an account to track your progress across timeline missions, you agree to safeguard your credentials and remain responsible for account activities.',
-                      ),
-                      _buildSectionTitle('4. Modifications to Service'),
+                      _buildSectionTitle('3. Modifications to Service'),
                       _buildSectionBody(
                         'We reserve the right to deploy updates to gameplay patches, historical acts, or layout elements without prior structural notifications to improve learning integrations.',
                       ),

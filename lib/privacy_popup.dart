@@ -77,29 +77,25 @@ class PrivacyPolicyPopup extends StatelessWidget {
                   child: ListView(
                     padding: const EdgeInsets.only(right: 12.0),
                     children: [
-                      _buildSectionTitle('1. Information We Collect'),
+                      _buildSectionTitle('1. Information We Do Not Collect'),
                       _buildSectionBody(
-                        'When you create an account or subscribe to news updates for "Echoes of the Past," we collect limited personal details such as your email address, account username, and localized gameplay progress flags.',
+                        'Echoes of the Past is designed to respect your privacy. We do not require you to create an account, log in, or provide any personal information (such as your name, email address, or phone number) to play the game.',
                       ),
-                      _buildSectionTitle('2. How We Use Your Data'),
+                      _buildSectionTitle('2. Game Progress and Local Data'),
                       _buildSectionBody(
-                        'Your data is exclusively used to save educational game milestones, deliver player support, and send important game updates or news if subscribed. We do not sell or monetize personal information.',
+                        'Any progress, scores, or settings saved during gameplay are stored locally on your device\'s browser storage. This data remains on your device and is not transmitted to or stored on our servers.',
                       ),
-                      _buildSectionTitle('3. Educational & Student Privacy'),
+                      _buildSectionTitle('3. Hosting and Technical Data'),
                       _buildSectionBody(
-                        'Because our application targets students and educators learning Cavite City’s history, we minimize data footprint by default. No personal student records or classroom performance tracking are shared with third parties.',
+                        'Our website is hosted on Vercel. Standard web request information (such as IP addresses and browser types) may be handled by Vercel automatically to deliver the website securely and efficiently. This technical data is not linked to any personal identity.',
                       ),
-                      _buildSectionTitle('4. AR Location Features'),
+                      _buildSectionTitle('4. Third-Party Links'),
                       _buildSectionBody(
-                        'When utilizing AR Artifact Discovery, camera and GPS permissions are accessed strictly on-device to render historical overlays in Cavite City. No location coordinates or visual feeds are stored on our servers.',
+                        'Our website or game footer may contain links to external sites (such as our official social media pages). We are not responsible for the privacy practices of external websites.',
                       ),
-                      _buildSectionTitle('5. Data Protection & Security'),
+                      _buildSectionTitle('5. Contact Us'),
                       _buildSectionBody(
-                        'We employ industry-standard encryption protocols to protect account credentials and prevent unauthorized access to your account data.',
-                      ),
-                      _buildSectionTitle('6. Contact Regarding Privacy'),
-                      _buildSectionBody(
-                        'If you wish to request account deletion or have questions regarding data handling, please reach out via the Contact Us popup or support channels.',
+                        'If you have any questions about this Privacy Policy or the game, you can reach us via our official contact channel.',
                       ),
                     ],
                   ),

@@ -5,11 +5,10 @@ import 'contact_popup.dart';
 import 'terms_of_service_popup.dart';
 import 'privacy_popup.dart';
 import 'sys_req_popup.dart';
+import 'cookie_popup.dart';
 
 class CharacterInfoPage extends StatelessWidget {
-  CharacterInfoPage({super.key});
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  const CharacterInfoPage({super.key});
 
   // Helper method to open the game URL in a new browser tab
   Future<void> _launchGameUrl() async {
@@ -21,18 +20,19 @@ class CharacterInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isMobile = screenWidth < 950;
     final bool isNarrowScreen = screenWidth < 900;
     final bool isMobileFooter = screenWidth < 700;
 
     return Scaffold(
-      key: _scaffoldKey,
+      key: scaffoldKey,
       backgroundColor: Colors.black,
       endDrawer: isMobile ? _buildDrawer(context) : null,
       body: CustomScrollView(
         slivers: [
-          _buildAppBar(context, isMobile),
+          _buildAppBar(context, isMobile, scaffoldKey),
           SliverToBoxAdapter(
             child: Column(
               children: [
@@ -51,7 +51,7 @@ class CharacterInfoPage extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24.0),
                   child: Text(
-                    "Meet the heroes who journey through time to uncover the truth about Cavite City's forgotten history",
+                    "Meet the hero who journeys through time to uncover the truth about Cavite City's forgotten history",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white70, fontSize: 18),
                   ),
@@ -103,61 +103,100 @@ class CharacterInfoPage extends StatelessWidget {
                   ),
                 ),
 
-                // CHARACTER CARDS SECTION
+                // CHARACTER CARDS & DESCRIPTION SECTION
                 _contentWrapper(
                   screenWidth: screenWidth,
-                  sectionContent: Center(
-                    child: Wrap(
-                      spacing: 30,
-                      runSpacing: 30,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        _characterCard(
-                          screenWidth: screenWidth,
-                          name: "Leandro Vergara",
-                          role: "Modern Historian",
-                          gender: "Male",
-                          time: "Present (2025)",
-                          description:
-                              "A dedicated historian searching for the truth about Cavite City's past. His discovery of the mysterious time machine in a hidden library sets everything in motion.",
-                          imageUrl: "assets/leandro.png",
-                          accentColor: const Color(0xFF3B82F6),
+                  sectionContent: Column(
+                    children: [
+                      Wrap(
+                        spacing: 30,
+                        runSpacing: 30,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _characterPortraitCard(
+                            screenWidth: screenWidth,
+                            name: "Leandro Vergara",
+                            role: "Modern Historian",
+                            gender: "Male",
+                            time: "Present (2025)",
+                            imageUrl: "assets/MC_Present.jpg",
+                            accentColor: const Color(0xFF3B82F6),
+                          ),
+                          _characterPortraitCard(
+                            screenWidth: screenWidth,
+                            name: "Leandro Vergara",
+                            role: "Time Traveler",
+                            gender: "Male",
+                            time: "Past (1896)",
+                            imageUrl: "assets/MC_Past.jpg", // Asset for past version
+                            accentColor: const Color(0xFFFB923C),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+
+                      // DEDICATED DESCRIPTION AREA WITH BLUE & ORANGE GRADIENT
+                      Container(
+                        width: double.infinity,
+                        constraints: const BoxConstraints(maxWidth: 1000),
+                        padding: EdgeInsets.all(isNarrowScreen ? 24.0 : 40.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white24, width: 1.5),
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color(0xFF1E3A8A), // Deep Blue
+                              Color(0xFF0F172A), // Dark Slate
+                              Color(0xFF7C2D12), // Deep Orange
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF3B82F6).withValues(alpha: 0.15),
+                              blurRadius: 20,
+                              spreadRadius: -5,
+                              offset: const Offset(-10, 0),
+                            ),
+                            BoxShadow(
+                              color: const Color(0xFFFB923C).withValues(alpha: 0.15),
+                              blurRadius: 20,
+                              spreadRadius: -5,
+                              offset: const Offset(10, 0),
+                            ),
+                          ],
                         ),
-                        _characterCard(
-                          screenWidth: screenWidth,
-                          name: "Emilia Legaspi",
-                          role: "Modern Researcher",
-                          gender: "Female",
-                          time: "Present (2025)",
-                          description:
-                              "A skilled researcher with a passion for uncovering hidden historical truths. She joins the journey to document the untold stories of Cavite City's heritage.",
-                          imageUrl: "assets/emilia.png",
-                          accentColor: const Color(0xFF3B82F6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.person_pin, color: Color(0xFFFB923C), size: 28),
+                                SizedBox(width: 12),
+                                Text(
+                                  "About Leandro Vergara",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "A dedicated modern-day historian whose relentless search for the truth about Cavite City's past leads him to discover a hidden library and a mysterious time machine. By immersing himself directly into the recorded memories of the past, Leandro bridges the gap between present-day research and historical events, navigating the struggles and pivotal moments that defined the city.",
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 17,
+                                height: 1.6,
+                              ),
+                            ),
+                          ],
                         ),
-                        _characterCard(
-                          screenWidth: screenWidth,
-                          name: "Marcelino Fuentes",
-                          role: "Historical Figure",
-                          gender: "Male",
-                          time: "Past (1896)",
-                          description:
-                              "A witness to the defining moments of Cavite City during the Spanish colonization. His memories are stored, waiting to be experienced.",
-                          imageUrl: "assets/marcelino.png",
-                          accentColor: const Color(0xFFFB923C),
-                        ),
-                        _characterCard(
-                          screenWidth: screenWidth,
-                          name: "Dolores Lazcano",
-                          role: "Historical Figure",
-                          gender: "Female",
-                          time: "Past (1896)",
-                          description:
-                              "A courageous resident of Cavite City whose experiences during the Spanish era reveal the struggles and resilience of the city's people.",
-                          imageUrl: "assets/dolores.png",
-                          accentColor: const Color(0xFFFB923C),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -180,14 +219,14 @@ class CharacterInfoPage extends StatelessWidget {
                           children: [
                             _journeyCard(
                                 "Framing Narrative (2025)",
-                                "Leandro Vergara/Emilia Legaspi discover a hidden library with a mysterious time machine. Memory containers hold recorded memories of Cavite City's significant historical events, ready to be experienced.",
+                                "Leandro Vergara discovers a hidden library with a mysterious time machine. Memory containers hold recorded memories of Cavite City's significant historical events, ready to be experienced.",
                                 const Color(0xFF1E293B),
                                 const Color(0xFF3B82F6),
                                 isFullWidth: true),
                             const SizedBox(height: 20),
                             _journeyCard(
                                 "Historical Acts (1571-1935)",
-                                "Experience six scripted narrative acts through the eyes of Marcelino Fuentes and Dolores Lazcano. Witness the Spanish naval port, Cavite Mutiny, Gomburza execution, Philippine Independence, and more.",
+                                "Experience six scripted narrative acts through the eyes of Leandro as he steps into history. Witness the Spanish naval port, Cavite Mutiny, Gomburza execution, Philippine Independence, and more.",
                                 const Color(0xFF1C1917),
                                 const Color(0xFFF59E0B),
                                 isFullWidth: true),
@@ -198,14 +237,14 @@ class CharacterInfoPage extends StatelessWidget {
                           children: [
                             _journeyCard(
                               "Framing Narrative (2025)",
-                              "Leandro Vergara/Emilia Legaspi discover a hidden library with a mysterious time machine. Memory containers hold recorded memories of Cavite City's significant historical events, ready to be experienced.",
+                              "Leandro Vergara discovers a hidden library with a mysterious time machine. Memory containers hold recorded memories of Cavite City's significant historical events, ready to be experienced.",
                               const Color(0xFF1E293B),
                               const Color(0xFF3B82F6),
                             ),
                             const SizedBox(width: 30),
                             _journeyCard(
                               "Historical Acts (1571-1935)",
-                              "Experience six scripted narrative acts through the eyes of Marcelino Fuentes and Dolores Lazcano. Witness the Spanish naval port, Cavite Mutiny, Gomburza execution, Philippine Independence, and more.",
+                              "Experience six scripted narrative acts through the eyes of Leandro as he steps into history. Witness the Spanish naval port, Cavite Mutiny, Gomburza execution, Philippine Independence, and more.",
                               const Color(0xFF1C1917),
                               const Color(0xFFF59E0B),
                             ),
@@ -227,9 +266,9 @@ class CharacterInfoPage extends StatelessWidget {
 
   // --- APP BAR & DRAWER WIDGETS ---
 
-  SliverAppBar _buildAppBar(BuildContext context, bool isMobile) {
+  SliverAppBar _buildAppBar(BuildContext context, bool isMobile, GlobalKey<ScaffoldState> scaffoldKey) {
     return SliverAppBar(
-      backgroundColor: Colors.black.withValues(alpha:0.9),
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
       floating: true,
       pinned: true,
       toolbarHeight: 80,
@@ -238,7 +277,7 @@ class CharacterInfoPage extends StatelessWidget {
           ? [
               IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                onPressed: () => scaffoldKey.currentState?.openEndDrawer(),
               ),
               const SizedBox(width: 12),
             ]
@@ -349,18 +388,18 @@ class CharacterInfoPage extends StatelessWidget {
     );
   }
 
-  Widget _characterCard({
+  // PORTRAIT CHARACTER CARD (WITHOUT EMBEDDED DESCRIPTION)
+  Widget _characterPortraitCard({
     required double screenWidth,
     required String name,
     required String role,
     required String gender,
     required String time,
-    required String description,
     required String imageUrl,
     required Color accentColor,
   }) {
     double cardWidth = (screenWidth - 150) / 2;
-    if (cardWidth > 580) cardWidth = 580;
+    if (cardWidth > 450) cardWidth = 450;
     if (screenWidth < 900) cardWidth = double.infinity;
 
     return Container(
@@ -368,7 +407,7 @@ class CharacterInfoPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0F172A),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: accentColor.withValues(alpha: 0.4), width: 1.5),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -377,7 +416,7 @@ class CharacterInfoPage extends StatelessWidget {
           Stack(
             children: [
               Container(
-                height: screenWidth < 500 ? 260 : 400,
+                height: screenWidth < 500 ? 320 : 480, // Portrait orientation height
                 width: double.infinity,
                 color: Colors.grey[900],
                 child: Image.asset(
@@ -394,15 +433,16 @@ class CharacterInfoPage extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha:0.2),
+                    color: Colors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: accentColor.withValues(alpha:0.5)),
+                    border: Border.all(color: accentColor.withValues(alpha: 0.8)),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.access_time, color: accentColor, size: 16),
                       const SizedBox(width: 8),
-                      Text(time, style: const TextStyle(color: Colors.white, fontSize: 12)),
+                      Text(time, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -410,11 +450,11 @@ class CharacterInfoPage extends StatelessWidget {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: TextStyle(color: accentColor, fontSize: 28, fontWeight: FontWeight.bold)),
+                Text(name, style: TextStyle(color: accentColor, fontSize: 26, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 12,
@@ -423,23 +463,21 @@ class CharacterInfoPage extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(gender == "Male" ? Icons.person : Icons.person_3, color: Colors.white38, size: 18),
+                        Icon(gender == "Male" ? Icons.person : Icons.person_3, color: Colors.white54, size: 18),
                         const SizedBox(width: 4),
-                        Text(gender, style: const TextStyle(color: Colors.white38)),
+                        Text(gender, style: const TextStyle(color: Colors.white54)),
                       ],
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.location_on, color: Colors.white38, size: 18),
+                        const Icon(Icons.location_on, color: Colors.white54, size: 18),
                         const SizedBox(width: 4),
-                        Text(role, style: const TextStyle(color: Colors.white38)),
+                        Text(role, style: const TextStyle(color: Colors.white54)),
                       ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Text(description, style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.5)),
               ],
             ),
           ),
@@ -454,7 +492,7 @@ class CharacterInfoPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withValues(alpha:0.5), width: 2),
+        border: Border.all(color: accentColor.withValues(alpha: 0.5), width: 2),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -519,11 +557,18 @@ class CharacterInfoPage extends StatelessWidget {
   }
 }
 
-// --- FULL RESPONSIVE FOOTER MATCHING HOME & MAP PAGES ---
+// --- RESPONSIVE FOOTER SECTION ---
 
 class FooterSection extends StatelessWidget {
   final bool isMobile;
   const FooterSection({super.key, required this.isMobile});
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $urlString');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -572,7 +617,7 @@ class FooterSection extends StatelessWidget {
                     items: {
                       "Terms of Service": "popup_terms",
                       "Privacy Policy": "popup_privacy",
-                      "Cookie Policy": "/cookie",
+                      "Cookie Policy": "popup_cookie",
                     },
                   ),
                 ),
@@ -613,7 +658,7 @@ class FooterSection extends StatelessWidget {
                   items: {
                     "Terms of Service": "popup_terms",
                     "Privacy Policy": "popup_privacy",
-                    "Cookie Policy": "/cookie",
+                    "Cookie Policy": "popup_cookie",
                   },
                 ),
               ],
@@ -621,15 +666,24 @@ class FooterSection extends StatelessWidget {
           const SizedBox(height: 60),
           const Divider(color: Colors.white10),
           const SizedBox(height: 20),
-          Row(
+          Flex(
+            direction: isMobile ? Axis.vertical : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  "© 2025 Echoes of the Past. All rights reserved.",
-                  style: const TextStyle(color: Colors.white24, fontSize: 12),
-                  textAlign: isMobile ? TextAlign.center : TextAlign.start,
-                ),
+              Text(
+                "© 2025 Echoes of the Past. All rights reserved.",
+                style: const TextStyle(color: Colors.white24, fontSize: 12),
+                textAlign: isMobile ? TextAlign.center : TextAlign.start,
+              ),
+              if (isMobile) const SizedBox(height: 12),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.facebook, color: Colors.white70, size: 20),
+                tooltip: 'Visit Facebook Page',
+                onPressed: () {
+                  _launchURL('https://www.facebook.com/profile.php?id=61592289615390');
+                },
               ),
             ],
           )
@@ -667,6 +721,8 @@ class FooterSection extends StatelessWidget {
                   TermsOfServicePopup.show(context);
                 } else if (pathValue == "popup_privacy") {
                   PrivacyPolicyPopup.show(context);
+                } else if (pathValue == "popup_cookie") {
+                  CookiePolicyPopup.show(context);
                 } else if (pathValue == "popup_sys_req") {
                   SysReqPopup.show(context);
                 } else {

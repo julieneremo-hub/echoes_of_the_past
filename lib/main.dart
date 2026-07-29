@@ -37,11 +37,33 @@ class EOTPApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => const HomePage(), 
-        '/about': (context) => AboutPage(),
-        '/map': (context) => const MapPage(), 
-        '/char_info': (context) => CharacterInfoPage(),
+      onGenerateRoute: (settings) {
+        Widget page;
+        switch (settings.name) {
+          case '/about':
+            page = AboutPage();
+            break;
+          case '/map':
+            page = const MapPage();
+            break;
+          case '/char_info':
+            page = CharacterInfoPage();
+            break;
+          case '/':
+          default:
+            page = const HomePage();
+            break;
+        }
+
+        // Returns a custom PageRoute with smooth cross-fade duration
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) => page,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 250),
+        );
       },
     );
   }

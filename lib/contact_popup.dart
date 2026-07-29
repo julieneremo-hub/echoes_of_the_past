@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactPopup extends StatefulWidget {
   const ContactPopup({super.key});
@@ -7,7 +8,7 @@ class ContactPopup extends StatefulWidget {
   static void show(BuildContext context) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha:0.7), // Darkened overlay
+      barrierColor: Colors.black.withValues(alpha: 0.7), // Darkened overlay
       builder: (context) => const ContactPopup(),
     );
   }
@@ -22,6 +23,9 @@ class _ContactPopupState extends State<ContactPopup> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
 
+  // Replace this with your actual target Gmail address
+  static const String targetGmail = "echoesofthepast0729@gmail.com";
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -30,19 +34,55 @@ class _ContactPopupState extends State<ContactPopup> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
-      // Handle your submission logic here (e.g., Firebase, backend API, etc.)
-      
-      Navigator.of(context).pop(); // Close popup
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Message sent successfully! We will get back to you soon.'),
-          backgroundColor: Color(0xFFC2410C), // Matching game orange
-        ),
+      final String name = _nameController.text.trim();
+      final String userEmail = _emailController.text.trim();
+      final String message = _messageController.text.trim();
+
+      // Encode query components to avoid malformed URI errors
+      final String subject = Uri.encodeComponent("Inquiry from $name (Echoes of the Past)");
+      final String body = Uri.encodeComponent(
+        "Name: $name\nSender Email: $userEmail\n\nMessage:\n$message",
       );
+
+      final Uri mailUri = Uri.parse("mailto:$targetGmail?subject=$subject&body=$body");
+
+      try {
+        final bool launched = await launchUrl(
+          mailUri,
+          mode: LaunchMode.externalApplication,
+        );
+
+        if (!launched && mounted) {
+          _showErrorSnackBar('Could not launch email client. Please try again.');
+          return;
+        }
+
+        if (mounted) {
+          Navigator.of(context).pop(); // Close popup on success
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Opening email app... Please send the pre-filled message.'),
+              backgroundColor: Color(0xFFC2410C),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          _showErrorSnackBar('Error opening mail client: $e');
+        }
+      }
     }
+  }
+
+  void _showErrorSnackBar(String errorMsg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(errorMsg),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
   }
 
   @override
@@ -56,7 +96,7 @@ class _ContactPopupState extends State<ContactPopup> {
       backgroundColor: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
-        side: BorderSide(color: Colors.white.withValues(alpha:0.1), width: 1),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
       ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -103,7 +143,7 @@ class _ContactPopupState extends State<ContactPopup> {
               TextFormField(
                 controller: _nameController,
                 style: const TextStyle(color: textColor),
-                validator: (value) => value == null || value.isEmpty ? 'Please enter your name' : null,
+                validator: (value) => value == null || value.trim().isEmpty ? 'Please enter your name' : null,
                 decoration: _inputDecoration('Enter your full name'),
               ),
               const SizedBox(height: 16),
@@ -114,8 +154,10 @@ class _ContactPopupState extends State<ContactPopup> {
                 controller: _emailController,
                 style: const TextStyle(color: textColor),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter your email';
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Enter a valid email';
+                  if (value == null || value.trim().isEmpty) return 'Please enter your email';
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+                    return 'Enter a valid email';
+                  }
                   return null;
                 },
                 decoration: _inputDecoration('Enter your email address'),
@@ -129,7 +171,7 @@ class _ContactPopupState extends State<ContactPopup> {
                 maxLines: 4,
                 maxLength: 500,
                 style: const TextStyle(color: textColor),
-                validator: (value) => value == null || value.isEmpty ? 'Please type your message' : null,
+                validator: (value) => value == null || value.trim().isEmpty ? 'Please type your message' : null,
                 decoration: _inputDecoration('How can we help you?').copyWith(
                   counterStyle: const TextStyle(color: subtitleColor, fontSize: 11),
                 ),
@@ -159,7 +201,7 @@ class _ContactPopupState extends State<ContactPopup> {
     );
   }
 
-  // Custom styling elements to keep layout code lightweight
+  // Custom styling elements
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6.0),

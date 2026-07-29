@@ -5,6 +5,7 @@ import 'contact_popup.dart';
 import 'terms_of_service_popup.dart';
 import 'privacy_popup.dart';
 import 'sys_req_popup.dart';
+import 'cookie_popup.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,14 +15,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final TextEditingController _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+
+    // Trigger the Cookie Policy banner on page load
+    CookiePolicyPopup.showBanner(
+      context,
+      onAccept: () {
+        // Additional acceptance logic if needed
+      },
+    );
   }
 
   // Helper method to open the game URL in a new browser tab
@@ -29,18 +35,6 @@ class _HomePageState extends State<HomePage> {
     final Uri gameUrl = Uri.parse('https://your-game-url.com'); // Replace with your actual game URL
     if (!await launchUrl(gameUrl, webOnlyWindowName: '_blank')) {
       debugPrint('Could not launch $gameUrl');
-    }
-  }
-
-  void _handleSubscribe() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Thank you for subscribing, ${_emailController.text}!'),
-          backgroundColor: const Color(0xFFC2410C),
-        ),
-      );
-      _emailController.clear();
     }
   }
 
@@ -61,7 +55,6 @@ class _HomePageState extends State<HomePage> {
               children: [
                 _buildHeroSection(context, isMobile),
                 _buildFeaturesSection(isMobile),
-                _buildSubscribeSection(isMobile),
                 FooterSection(isMobile: isMobile),
               ],
             ),
@@ -75,7 +68,7 @@ class _HomePageState extends State<HomePage> {
 
   SliverAppBar _buildAppBar(BuildContext context, bool isMobile) {
     return SliverAppBar(
-      backgroundColor: Colors.black.withValues(alpha:0.9),
+      backgroundColor: Colors.black.withValues(alpha: 0.9),
       floating: true,
       pinned: true,
       toolbarHeight: 80,
@@ -156,7 +149,7 @@ class _HomePageState extends State<HomePage> {
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFFC2410C),
         padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 16 : 20, 
+          horizontal: isMobile ? 16 : 20,
           vertical: isMobile ? 16 : 15,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -258,92 +251,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildSubscribeSection(bool isMobile) {
-    return _contentWrapper(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 60, vertical: 60),
-      sectionContent: Container(
-        padding: EdgeInsets.all(isMobile ? 32 : 80),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F172A),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white10),
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const Icon(Icons.mail_outline, color: Color(0xFFF97316), size: 50),
-              const SizedBox(height: 20),
-              Text(
-                "Subscribe for the Latest News & Updates",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: isMobile ? 26 : 36, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 40),
-              if (!isMobile)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(width: 450, child: _buildEmailTextField()),
-                    const SizedBox(width: 20),
-                    _buildSubscribeButton(isFullWidth: false),
-                  ],
-                )
-              else
-                Column(
-                  children: [
-                    _buildEmailTextField(),
-                    const SizedBox(height: 16),
-                    _buildSubscribeButton(isFullWidth: true),
-                  ],
-                )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmailTextField() {
-    return TextFormField(
-      controller: _emailController,
-      style: const TextStyle(color: Colors.white),
-      validator: (value) {
-        if (value == null || value.isEmpty) return 'Please enter your email';
-        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Please enter a valid email address';
-        return null;
-      },
-      decoration: InputDecoration(
-        hintText: "Enter your email address",
-        hintStyle: const TextStyle(color: Colors.white24),
-        filled: true,
-        fillColor: Colors.black26,
-        errorStyle: const TextStyle(color: Color(0xFFFB923C)),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.white10),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubscribeButton({required bool isFullWidth}) {
-    return SizedBox(
-      width: isFullWidth ? double.infinity : null,
-      child: ElevatedButton(
-        onPressed: _handleSubscribe,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFF97316),
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 25),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-        child: const Text("Subscribe", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-    );
-  }
-
   Widget _contentWrapper({required Widget sectionContent, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,
@@ -384,6 +291,13 @@ class _HomePageState extends State<HomePage> {
 class FooterSection extends StatelessWidget {
   final bool isMobile;
   const FooterSection({super.key, required this.isMobile});
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('Could not launch $urlString');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -432,7 +346,7 @@ class FooterSection extends StatelessWidget {
                     items: {
                       "Terms of Service": "popup_terms", 
                       "Privacy Policy": "popup_privacy",
-                      "Cookie Policy": "/cookie"
+                      "Cookie Policy": "popup_cookie"
                     }
                   ),
                 ),
@@ -467,7 +381,7 @@ class FooterSection extends StatelessWidget {
                   items: {
                     "Terms of Service": "popup_terms", 
                     "Privacy Policy": "popup_privacy",
-                    "Cookie Policy": "/cookie"
+                    "Cookie Policy": "popup_cookie"
                   }
                 ),
               ],
@@ -481,9 +395,18 @@ class FooterSection extends StatelessWidget {
               Expanded(
                 child: Text(
                   "© 2025 Echoes of the Past. All rights reserved.",
-                  style: const TextStyle(color: Colors.white24, fontSize: 12),
+                  style: const TextStyle(color: Colors.white38, fontSize: 12),
                   textAlign: isMobile ? TextAlign.center : TextAlign.start,
                 ),
+              ),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.facebook, color: Colors.white70, size: 20),
+                tooltip: 'Visit Facebook Page',
+                onPressed: () {
+                  _launchURL('https://www.facebook.com/profile.php?id=61592289615390');
+                },
               ),
             ],
           )
@@ -521,6 +444,8 @@ class FooterSection extends StatelessWidget {
                   TermsOfServicePopup.show(context);
                 } else if (pathValue == "popup_privacy") {
                   PrivacyPolicyPopup.show(context);
+                } else if (pathValue == "popup_cookie") {
+                  CookiePolicyPopup.show(context);
                 } else if (pathValue == "popup_sys_req") {
                   SysReqPopup.show(context);
                 } else {
