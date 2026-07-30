@@ -389,102 +389,127 @@ class CharacterInfoPage extends StatelessWidget {
   }
 
   // PORTRAIT CHARACTER CARD (WITHOUT EMBEDDED DESCRIPTION)
-  Widget _characterPortraitCard({
-    required double screenWidth,
-    required String name,
-    required String role,
-    required String gender,
-    required String time,
-    required String imageUrl,
-    required Color accentColor,
-  }) {
-    double cardWidth = (screenWidth - 150) / 2;
-    if (cardWidth > 450) cardWidth = 450;
-    if (screenWidth < 900) cardWidth = double.infinity;
+  // PORTRAIT CHARACTER CARD (FULL-BODY AUTO-FIT)
+Widget _characterPortraitCard({
+  required double screenWidth,
+  required String name,
+  required String role,
+  required String gender,
+  required String time,
+  required String imageUrl,
+  required Color accentColor,
+}) {
+  double cardWidth = (screenWidth - 150) / 2;
+  if (cardWidth > 420) cardWidth = 420;
+  if (screenWidth < 900) cardWidth = double.infinity;
 
-    return Container(
-      width: cardWidth,
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accentColor.withValues(alpha: 0.4), width: 1.5),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: screenWidth < 500 ? 320 : 480, // Portrait orientation height
+  return Container(
+    width: cardWidth,
+    decoration: BoxDecoration(
+      color: const Color(0xFF0F172A),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: accentColor.withValues(alpha: 0.4), width: 1.5),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Stack(
+          children: [
+            // Uses AspectRatio (9:16 vertical ratio) to maintain room for the full portrait
+            AspectRatio(
+              aspectRatio: 9 / 16,
+              child: Container(
                 width: double.infinity,
-                color: Colors.grey[900],
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                color: const Color(0xFF0B1120), // Dark background matching card aesthetic
                 child: Image.asset(
                   imageUrl,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain, // Fits entire image (head to toe) without cropping
+                  alignment: Alignment.center,
                   errorBuilder: (context, error, stackTrace) {
                     return const Icon(Icons.person, size: 100, color: Colors.white10);
                   },
                 ),
               ),
-              Positioned(
-                top: 20,
-                right: 20,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: accentColor.withValues(alpha: 0.8)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.access_time, color: accentColor, size: 16),
-                      const SizedBox(width: 8),
-                      Text(time, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
+            ),
+            // Time Badge overlay
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: accentColor.withValues(alpha: 0.8)),
                 ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: TextStyle(color: accentColor, fontSize: 26, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 6,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(gender == "Male" ? Icons.person : Icons.person_3, color: Colors.white54, size: 18),
-                        const SizedBox(width: 4),
-                        Text(gender, style: const TextStyle(color: Colors.white54)),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.location_on, color: Colors.white54, size: 18),
-                        const SizedBox(width: 4),
-                        Text(role, style: const TextStyle(color: Colors.white54)),
-                      ],
+                    Icon(Icons.access_time, color: accentColor, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: TextStyle(
+                  color: accentColor,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 12,
+                runSpacing: 6,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        gender == "Male" ? Icons.person : Icons.person_3,
+                        color: Colors.white54,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(gender, style: const TextStyle(color: Colors.white54)),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.white54, size: 18),
+                      const SizedBox(width: 4),
+                      Text(role, style: const TextStyle(color: Colors.white54)),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _journeyCard(String title, String desc, Color bgColor, Color accentColor, {bool isFullWidth = false}) {
     final Widget cardContent = Container(

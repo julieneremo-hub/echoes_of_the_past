@@ -1,98 +1,151 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CookiePolicyPopup extends StatelessWidget {
   const CookiePolicyPopup({super.key});
+
+  /// Preference key for tracking consent
+  static const String _consentKey = 'cookie_consent_given';
 
   /// Opens the full Cookie Policy dialog popup
   static void show(BuildContext context) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha:0.8),
+      barrierColor: Colors.black.withValues(alpha: 0.8),
       builder: (context) => const CookiePolicyPopup(),
     );
   }
 
-  /// Displays the bottom banner upon entering the website
-  static void showBanner(BuildContext context, {required VoidCallback onAccept}) {
+  /// Displays the bottom SnackBar banner upon entering the website ONLY ONCE
+  static Future<void> showBanner(BuildContext context, {VoidCallback? onAccept}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool hasConsented = prefs.getBool(_consentKey) ?? false;
+
+    // If user already consented, do not show the banner again
+    if (hasConsented) return;
+
+    if (!context.mounted) return;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showMaterialBanner(
-        MaterialBanner(
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          elevation: 6,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 14.0),
           backgroundColor: const Color(0xFF0F172A), // Dark slate container
-          dividerColor: Colors.white10,
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          content: Row(
-            children: [
-              const Icon(Icons.cookie_outlined, color: Color(0xFFF97316), size: 28),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      "We use cookies",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    RichText(
-                      text: TextSpan(
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                        children: [
-                          const TextSpan(
-                            text: "We use essential cookies to optimize performance and save your preferences. ",
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          duration: const Duration(days: 365), // Keep visible until user interacts
+          content: LayoutBuilder(
+            builder: (context, constraints) {
+              final bool isMobile = constraints.maxWidth < 600;
+
+              final Widget contentWidget = Row(
+                children: [
+                  const Icon(Icons.cookie_outlined, color: Color(0xFFF97316), size: 28),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "We use cookies",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
                           ),
-                          WidgetSpan(
-                            child: InkWell(
-                              onTap: () => show(context),
-                              child: const Text(
-                                "Learn more",
-                                style: TextStyle(
-                                  color: Color(0xFFF97316),
-                                  decoration: TextDecoration.underline,
-                                  fontSize: 13,
+                        ),
+                        const SizedBox(height: 2),
+                        RichText(
+                          text: TextSpan(
+                            style: const TextStyle(color: Colors.white70, fontSize: 12),
+                            children: [
+                              const TextSpan(
+                                text: "We use essential cookies to optimize performance and save your preferences. ",
+                              ),
+                              WidgetSpan(
+                                child: InkWell(
+                                  onTap: () => show(context),
+                                  child: const Text(
+                                    "Learn more",
+                                    style: TextStyle(
+                                      color: Color(0xFFF97316),
+                                      decoration: TextDecoration.underline,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+
+              final List<Widget> actionButtons = [
+                TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    show(context);
+                  },
+                  child: const Text(
+                    "Preferences",
+                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    // Save preference so it never shows again
+                    final instance = await SharedPreferences.getInstance();
+                    await instance.setBool(_consentKey, true);
+                    
+                    if (onAccept != null) onAccept();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF97316),
+                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  ),
+                  child: const Text(
+                    "Accept All",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+              ];
+
+              if (isMobile) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    contentWidget,
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: actionButtons,
                     ),
                   ],
-                ),
-              ),
-            ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(child: contentWidget),
+                  const SizedBox(width: 16),
+                  Row(children: actionButtons),
+                ],
+              );
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-                show(context);
-              },
-              child: const Text(
-                "Preferences",
-                style: TextStyle(color: Colors.white70),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-                onAccept();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF97316),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              ),
-              child: const Text(
-                "Accept All",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
         ),
       );
     });
@@ -108,7 +161,7 @@ class CookiePolicyPopup extends StatelessWidget {
       backgroundColor: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
-        side: BorderSide(color: Colors.white.withValues(alpha:0.1), width: 1),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
       ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 580, maxHeight: 620),
@@ -182,7 +235,11 @@ class CookiePolicyPopup extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      final instance = await SharedPreferences.getInstance();
+                      await instance.setBool(_consentKey, true);
+                    },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.white24),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -194,7 +251,11 @@ class CookiePolicyPopup extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      final instance = await SharedPreferences.getInstance();
+                      await instance.setBool(_consentKey, true);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -239,7 +300,7 @@ class CookiePolicyPopup extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isRequired ? accentColor.withValues(alpha:0.2) : Colors.white10,
+                  color: isRequired ? accentColor.withValues(alpha: 0.2) : Colors.white10,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(

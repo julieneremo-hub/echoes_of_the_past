@@ -19,16 +19,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    super.initState();
+  super.initState();
 
-    // Trigger the Cookie Policy banner on page load
-    CookiePolicyPopup.showBanner(
-      context,
-      onAccept: () {
-        // Additional acceptance logic if needed
-      },
-    );
-  }
+  // Schedule the banner call right after the first frame renders
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) {
+      CookiePolicyPopup.showBanner(
+        context,
+        onAccept: () {
+          // Additional acceptance logic if needed
+        },
+      );
+    }
+  });
+}
 
   // Helper method to open the game URL in a new browser tab
   Future<void> _launchGameUrl() async {
