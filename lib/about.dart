@@ -103,8 +103,8 @@ class AboutPage extends StatelessWidget {
                           ),
                           SizedBox(width: isMobile ? 0 : 20, height: isMobile ? 20 : 0),
                           _mechanicCard(
-                            "AR Artifact Discovery",
-                            "In the modern timeline, use your device's camera to discover historical artifacts overlaid on real-world locations in Cavite City through augmented reality.",
+                            "Artifact Discovery",
+                            "Discover historical artifacts overlaid on real-world locations in Cavite City.",
                             isMobile,
                           ),
                         ],
