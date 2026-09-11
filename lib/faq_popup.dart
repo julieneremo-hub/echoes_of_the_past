@@ -31,10 +31,6 @@ class FaqPopup extends StatelessWidget {
         'a': 'Yes! The game is completely free and designed as an educational tool for students, educators, and history enthusiasts alike.'
       },
       {
-        'q': 'How do I use the AR Artifact Discovery feature?',
-        'a': 'When playing on a mobile device, you can use your camera to view acquired artifacts.'
-      },
-      {
         'q': 'Can educators use this in classrooms?',
         'a': 'Absolutely. The game aligns with historical timelines and educational frameworks to provide an engaging supplement to traditional lessons.'
       },
@@ -96,14 +92,14 @@ class FaqPopup extends StatelessWidget {
                   separatorBuilder: (context, index) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     return Container(
-  decoration: BoxDecoration(
-    color: Colors.white.withValues(alpha:0.03),
-    borderRadius: BorderRadius.circular(8),
-    border: Border.all( // <-- Changed from BorderSide to Border.all
-      color: Colors.white.withValues(alpha:0.05),
-    ),
-  ),
-  child: ExpansionTile(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha:0.03),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all( 
+                          color: Colors.white.withValues(alpha:0.05),
+                        ),
+                      ),
+                      child: ExpansionTile(
                         iconColor: accentColor,
                         collapsedIconColor: subtitleColor,
                         title: Text(

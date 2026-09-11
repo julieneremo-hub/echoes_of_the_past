@@ -119,7 +119,6 @@ class SysReqPopup extends StatelessWidget {
                           _BuildSpecRow('Android OS', 'Android 8.0 (Oreo) or higher'),
                           _BuildSpecRow('Storage Space', 'approx. 250 MB free space'),
                           _BuildSpecRow('RAM', '3 GB Minimum (4 GB Recommended)'),
-                          _BuildSpecRow('AR Features', 'ARCore / ARKit compatible camera'),
                         ],
                       ),
                     ),
