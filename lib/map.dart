@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'faq_popup.dart';
 import 'contact_popup.dart';
 import 'terms_of_service_popup.dart';
@@ -165,11 +166,15 @@ class _MapPageState extends State<MapPage> {
                             builder: (context, constraints) {
                               return Stack(
                                 children: [
-                                  Center(
+                                  // THE NEW SVG MAP LAYER
+                                  Positioned.fill(
                                     child: Opacity(
-                                      opacity: 0.1, 
-                                      child: Icon(Icons.map, size: isCompact ? 180 : 250, color: Colors.white)
-                                    )
+                                      opacity: 0.85, 
+                                      child: SvgPicture.asset(
+                                        'assets/cavite_map.svg',
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
                                   ),
                                   
                                   ...locations.map((loc) {

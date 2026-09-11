@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <defs>
+    <!-- Old Paper Texture Gradients -->
+    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4c3a3" />
+      <stop offset="50%" stop-color="#e3d5b8" />
+      <stop offset="100%" stop-color="#c2b08d" />
+    </linearGradient>
+    <linearGradient id="seaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a3b4c" />
+      <stop offset="100%" stop-color="#1a2530" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark Sea Background (blends with your UI) -->
+  <rect width="800" height="600" fill="url(#seaGrad)" />
+
+  <!-- Grid lines for cartography feel -->
+  <g stroke="#ffffff" stroke-opacity="0.05" stroke-width="1">
+    <line x1="0" y1="100" x2="800" y2="100" />
+    <line x1="0" y1="200" x2="800" y2="200" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="400" x2="800" y2="400" />
+    <line x1="0" y1="500" x2="800" y2="500" />
+    <line x1="100" y1="0" x2="100" y2="600" />
+    <line x1="200" y1="0" x2="200" y2="600" />
+    <line x1="300" y1="0" x2="300" y2="600" />
+    <line x1="400" y1="0" x2="400" y2="600" />
+    <line x1="500" y1="0" x2="500" y2="600" />
+    <line x1="600" y1="0" x2="600" y2="600" />
+    <line x1="700" y1="0" x2="700" y2="600" />
+  </g>
+
+  <!-- Low Poly Landmass (Cavite Peninsula & Mainland) -->
+  <!-- Base Shadow -->
+  <polygon points="120,550 350,550 480,420 400,320 280,340 320,220 450,150 580,180 620,120 480,80 320,120 200,200 120,380" fill="#111820" opacity="0.5" transform="translate(10, 10)"/>
+  
+  <!-- Landmass Polygons (Old Paper Colors) -->
+  <polygon points="120,550 250,480 180,380 100,450" fill="#c2b08d" />
+  <polygon points="250,480 350,550 480,420 380,380" fill="#d4c3a3" />
+  <polygon points="250,480 380,380 280,340 180,380" fill="#e3d5b8" />
+  <polygon points="380,380 480,420 400,320 280,340" fill="#d4c3a3" />
+  <polygon points="280,340 400,320 320,220" fill="#c2b08d" />
+  <polygon points="400,320 520,260 450,150 320,220" fill="#d4c3a3" />
+  <polygon points="520,260 580,180 450,150" fill="#e3d5b8" />
+  <polygon points="450,150 580,180 620,120 480,80" fill="#c2b08d" />
+  <polygon points="450,150 480,80 320,120 320,220" fill="#d4c3a3" />
+  <polygon points="320,220 320,120 200,200 280,340" fill="#e3d5b8" />
+  <polygon points="280,340 200,200 120,380 180,380" fill="#d4c3a3" />
+
+  <!-- Compass Rose (Cartography feel) -->
+  <g transform="translate(80, 80) scale(0.6)">
+    <polygon points="50,0 60,40 100,50 60,60 50,100 40,60 0,50 40,40" fill="#c2b08d" />
+    <polygon points="50,0 60,40 50,50" fill="#8a795d" />
+    <polygon points="100,50 60,60 50,50" fill="#8a795d" />
+    <polygon points="50,100 40,60 50,50" fill="#8a795d" />
+    <polygon points="0,50 40,40 50,50" fill="#8a795d" />
+    <circle cx="50" cy="50" r="8" fill="#1a2530" />
+  </g>
+</svg>
