@@ -19,20 +19,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-  super.initState();
+    super.initState();
 
-  // Schedule the banner call right after the first frame renders
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (mounted) {
-      CookiePolicyPopup.showBanner(
-        context,
-        onAccept: () {
-          // Additional acceptance logic if needed
-        },
-      );
-    }
-  });
-}
+    // Schedule the banner call right after the first frame renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        CookiePolicyPopup.showBanner(
+          context,
+          onAccept: () {
+            // Additional acceptance logic if needed
+          },
+        );
+      }
+    });
+  }
 
   // Helper method to open the game URL in a new browser tab
   Future<void> _launchGameUrl() async {
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black, // Global solid black background
       endDrawer: isMobile ? _buildDrawer(context) : null,
       body: CustomScrollView(
         slivers: [
@@ -197,41 +197,57 @@ class _HomePageState extends State<HomePage> {
   // PAGE SECTION BUILDERS
 
   Widget _buildHeroSection(BuildContext context, bool isMobile) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.9,
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 40),
-      decoration: const BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage('assets/hero_bg.png'),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(Colors.black54, BlendMode.darken),
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Text(
-            "Echoes of the Past",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: const Color(0xFFF97316), fontSize: isMobile ? 44 : 80, fontWeight: FontWeight.bold),
+          // 1. ASSET LAYER: Background JPG Image
+          Image.asset(
+            'assets/hero_bg.jpg',
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(color: const Color(0xFF0F172A));
+            },
           ),
-          const SizedBox(height: 8),
-          Text(
-            "A role-playing game about the history and cultural heritage of Cavite City",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: isMobile ? 16 : 22),
+          
+          // 2. ASSET LAYER: Darkening Overlay (Keeps text readable)
+          Container(
+            color: Colors.black.withValues(alpha: 0.65), 
           ),
-          const SizedBox(height: 30),
+          
+          // 3. CONTENT LAYER: Hero Text & Icon
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 200),
-            child: Text(
-              "Uncover the hidden truth of Cavite City through a mysterious time machine that sends you into the past itself.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: isMobile ? 14 : 18, height: 1.5),
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Echoes of the Past",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: const Color(0xFFF97316), fontSize: isMobile ? 44 : 80, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "A role-playing game about the history and cultural heritage of Cavite City",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: isMobile ? 16 : 22),
+                ),
+                const SizedBox(height: 30),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 0 : 200),
+                  child: Text(
+                    "Uncover the hidden truth of Cavite City through a mysterious time machine that sends you into the past itself.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white70, fontSize: isMobile ? 14 : 18, height: 1.5),
+                  ),
+                ),
+                const SizedBox(height: 60),
+                const Icon(Icons.mouse_outlined, color: Colors.white54, size: 32),
+              ],
             ),
           ),
-          const SizedBox(height: 60),
-          const Icon(Icons.mouse_outlined, color: Colors.white54, size: 32),
         ],
       ),
     );
@@ -258,6 +274,7 @@ class _HomePageState extends State<HomePage> {
   Widget _contentWrapper({required Widget sectionContent, EdgeInsets? padding}) {
     return Container(
       width: double.infinity,
+      color: const Color(0xFF0F172A),
       padding: padding ?? const EdgeInsets.symmetric(horizontal: 60, vertical: 100),
       child: Center(
         child: ConstrainedBox(
@@ -274,7 +291,7 @@ class _HomePageState extends State<HomePage> {
       height: 280,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10),
       ),
