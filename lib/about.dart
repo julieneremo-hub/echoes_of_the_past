@@ -141,7 +141,7 @@ class AboutPage extends StatelessWidget {
                     children: [
                       _featureItem("Students (15-18)", "An engaging way to learn Philippine history that complements classroom instruction."),
                       _featureItem("Educators", "A powerful digital teaching tool for lesson plans and classroom activities."),
-                      _featureItem("Tourists", "An immersive introduction to Cavite's historical significance through AR features."),
+                      _featureItem("Tourists", "An immersive introduction to Cavite's historical significance."),
                       _featureItem("History Enthusiasts", "Deep dive into revolutionary events with authentic historical content."),
                     ],
                   ),
